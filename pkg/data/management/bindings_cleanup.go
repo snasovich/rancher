@@ -14,18 +14,19 @@ import (
 func CleanupDuplicateBindings(scaledContext *config.ScaledContext, wContext *wrangler.Context) {
 	//check if duplicate binding cleanup has run already
 	logrus.Info("CleanupDuplicateBindings, checking configmap")
-	if adminConfig, err := wContext.K8s.CoreV1().ConfigMaps(cattleNamespace).Get(context.TODO(), bootstrapAdminConfig, v1.GetOptions{}); err != nil {
+	if _, err := wContext.K8s.CoreV1().ConfigMaps(cattleNamespace).Get(context.TODO(), bootstrapAdminConfig, v1.GetOptions{}); err != nil {
 		if !apierrors.IsNotFound(err) {
 			logrus.Warnf("Unable to determine if bindings cleanup already ran or not, skipping run: %v", err)
 			return
 		}
 	} else {
 		// config map already exists, check if the cleanup key is found
-		if _, ok := adminConfig.Data["DedupeBindingsDone"]; ok {
-			//cleanup has been run already, nothing to do here
-			logrus.Info("bindings cleanup already ran before, not calling again")
-			return
-		}
+		// TODO: Check temporarily removed
+		//if _, ok := adminConfig.Data["DedupeBindingsDone"]; ok {
+		//	//cleanup has been run already, nothing to do here
+		//	logrus.Info("bindings cleanup already ran before, not calling again")
+		//	return
+		//}
 		// run cleanup
 		logrus.Info("Calling Duplicate CRB and RB cleanup")
 		err = clean.Bindings(&scaledContext.RESTConfig)
