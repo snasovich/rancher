@@ -128,6 +128,7 @@ func (bc *bindingsCleanup) clean() error {
 	waitGroup.Add(2)
 	go func() {
 		if err := bc.cleanCRTB(rancher25, crtbs.Items); err != nil {
+			logrus.Error("REMOVE - There was an error cleaning CRTBs")
 			logrus.Error(err)
 		}
 		waitGroup.Done()
@@ -135,6 +136,7 @@ func (bc *bindingsCleanup) clean() error {
 
 	go func() {
 		if err := bc.cleanPRTB(rancher25, prtbs.Items); err != nil {
+			logrus.Error("REMOVE - There was an error cleaning PRTBs")
 			logrus.Error(err)
 		}
 		waitGroup.Done()
@@ -236,10 +238,9 @@ func (bc *bindingsCleanup) dedupeCRB(bindings []k8srbacv1.ClusterRoleBinding) er
 			continue
 		}
 		if !dryRun {
-			// TODO: Do nothing for testing
-			//if err := bc.clusterRoleBindings.Delete(binding.Name, &metav1.DeleteOptions{}); err != nil {
-			//	logrus.Errorf("error attempting to delete CRB %v %v", binding.Name, err)
-			//}
+			if err := bc.clusterRoleBindings.Delete(binding.Name, &metav1.DeleteOptions{}); err != nil {
+				logrus.Errorf("error attempting to delete CRB %v %v", binding.Name, err)
+			}
 		} else {
 			logrus.Infof("DryRun enabled, clusterRoleBinding %v would be deleted", binding.Name)
 		}
@@ -282,10 +283,9 @@ func (bc *bindingsCleanup) dedupeRB(roleBindings []k8srbacv1.RoleBinding) (int, 
 			}
 			duplicatesFound++
 			if !dryRun {
-				// TODO: Do nothing for testing
-				//if err := bc.roleBindings.Delete(binding.Namespace, binding.Name, &metav1.DeleteOptions{}); err != nil {
-				//	logrus.Errorf("error attempting to delete RB %v %v", binding.Name, err)
-				//}
+				if err := bc.roleBindings.Delete(binding.Namespace, binding.Name, &metav1.DeleteOptions{}); err != nil {
+					logrus.Errorf("error attempting to delete RB %v %v", binding.Name, err)
+				}
 			} else {
 				logrus.Infof("DryRun enabled, roleBinding %v in namespace %v would be deleted", binding.Name, binding.Namespace)
 			}
