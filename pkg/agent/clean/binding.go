@@ -175,25 +175,25 @@ func (bc *bindingsCleanup) cleanObjectDuplicates(bindingType string, newLabel bo
 
 			crbs, err := bc.clusterRoleBindings.List(metav1.ListOptions{LabelSelector: label})
 			if err != nil {
-				multierror.Append(returnErr, err)
+				returnErr = multierror.Append(returnErr, err)
 			}
 
 			if len(crbs.Items) > 1 {
 				CRBduplicates += len(crbs.Items) - 1
 				if err := bc.dedupeCRB(crbs.Items); err != nil {
-					multierror.Append(returnErr, err)
+					returnErr = multierror.Append(returnErr, err)
 				}
 			}
 
 			roleBindings, err := bc.roleBindings.List("", metav1.ListOptions{LabelSelector: label})
 			if err != nil {
-				multierror.Append(returnErr, err)
+				returnErr = multierror.Append(returnErr, err)
 			}
 
 			if len(roleBindings.Items) > 1 {
 				roleDuplicates, err := bc.dedupeRB(roleBindings.Items)
 				if err != nil {
-					multierror.Append(returnErr, err)
+					returnErr = multierror.Append(returnErr, err)
 				}
 				RBDupes += roleDuplicates
 			}
