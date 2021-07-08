@@ -146,6 +146,7 @@ func (bc *bindingsCleanup) clean() error {
 }
 
 func (bc *bindingsCleanup) cleanCRTB(newLabel bool, crtbs []apiv3.ClusterRoleTemplateBinding) error {
+	logrus.Infof("REMOVE - Total CRTBs: %v", len(crtbs))
 	var objectMetas []metav1.ObjectMeta
 	for _, crtb := range crtbs {
 		objectMetas = append(objectMetas, crtb.ObjectMeta)
@@ -155,6 +156,7 @@ func (bc *bindingsCleanup) cleanCRTB(newLabel bool, crtbs []apiv3.ClusterRoleTem
 }
 
 func (bc *bindingsCleanup) cleanPRTB(newLabel bool, prtbs []apiv3.ProjectRoleTemplateBinding) error {
+	logrus.Infof("REMOVE - Total PRTBs: %v", len(prtbs))
 	var objectMetas []metav1.ObjectMeta
 	for _, prtb := range prtbs {
 		objectMetas = append(objectMetas, prtb.ObjectMeta)
@@ -174,6 +176,8 @@ func (bc *bindingsCleanup) cleanObjectDuplicates(bindingType string, newLabel bo
 		labels := createLabelSelectors(newLabel, meta, bindingType)
 		for _, label := range labels {
 			var CRBduplicates, RBDupes int
+
+			logrus.Infof("REMOVE - Checking Dupes for label '%v'", label)
 
 			crbs, err := bc.clusterRoleBindings.List(metav1.ListOptions{LabelSelector: label})
 			if err != nil {
@@ -238,9 +242,10 @@ func (bc *bindingsCleanup) dedupeCRB(bindings []k8srbacv1.ClusterRoleBinding) er
 			continue
 		}
 		if !dryRun {
-			if err := bc.clusterRoleBindings.Delete(binding.Name, &metav1.DeleteOptions{}); err != nil {
-				logrus.Errorf("error attempting to delete CRB %v %v", binding.Name, err)
-			}
+			// TODO: For now doing nothing
+			//if err := bc.clusterRoleBindings.Delete(binding.Name, &metav1.DeleteOptions{}); err != nil {
+			//	logrus.Errorf("error attempting to delete CRB %v %v", binding.Name, err)
+			//}
 		} else {
 			logrus.Infof("DryRun enabled, clusterRoleBinding %v would be deleted", binding.Name)
 		}
@@ -283,9 +288,10 @@ func (bc *bindingsCleanup) dedupeRB(roleBindings []k8srbacv1.RoleBinding) (int, 
 			}
 			duplicatesFound++
 			if !dryRun {
-				if err := bc.roleBindings.Delete(binding.Namespace, binding.Name, &metav1.DeleteOptions{}); err != nil {
-					logrus.Errorf("error attempting to delete RB %v %v", binding.Name, err)
-				}
+				// TODO: For now doing nothing
+				//if err := bc.roleBindings.Delete(binding.Namespace, binding.Name, &metav1.DeleteOptions{}); err != nil {
+				//	logrus.Errorf("error attempting to delete RB %v %v", binding.Name, err)
+				//}
 			} else {
 				logrus.Infof("DryRun enabled, roleBinding %v in namespace %v would be deleted", binding.Name, binding.Namespace)
 			}
